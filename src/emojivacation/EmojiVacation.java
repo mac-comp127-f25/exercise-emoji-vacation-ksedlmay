@@ -34,6 +34,10 @@ public class EmojiVacation {
     private static void doSlideShow(CanvasWindow canvas) {
         // TODO: [Instructions step 8] Change this to an actual slideshow
         generateVacationPhoto(canvas);
+        canvas.draw();
+        canvas.pause(3000);
+        canvas.removeAll();
+        generateVacationPhoto(canvas);
     }
 
     private static void generateVacationPhoto(CanvasWindow canvas) {
@@ -47,15 +51,30 @@ public class EmojiVacation {
         //       You should randomly determine the size and number of layers
         //       (within reasonable constraints).
 
+        if (percentChance(50)) {
+            double size = randomDouble(10, 200);   
+            int layers = randomInt(1, 10);           
+            addMountains(canvas, 400, size, layers);
+        }
+
         addGround(canvas, 400);
 
         // TODO: [Instructions step 2] Create forests 60% of the time. You should randomly
         //       determine the count for the number of trees. Pick reasonable values for
         //       other parameters.
+        if (percentChance(60)) {
+            int treeCount = randomInt(1, 100);      
+            double ySpan = randomDouble(0, 200);   
+            addForest(canvas, 400, ySpan, treeCount);
+        }
 
         List<GraphicsGroup> family = createFamily(2, 3);
         positionFamily(family, 60, 550, 20);
         // TODO: [Instructions step 4] Add each emoji in the list to the canvas
+
+        for (GraphicsGroup emoji : family) {
+            canvas.add(emoji);
+        }
     }
 
     // –––––– Emoji family –––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
@@ -70,9 +89,20 @@ public class EmojiVacation {
         // Hint: You can't use List.of() to do this, because you don't know the size of the
         // resulting list before the code actually runs. What can you use?
         //
-        return List.of(
-            createRandomEmoji(adultSize),
-            createRandomEmoji(childSize));
+        List<GraphicsGroup> family = new ArrayList<>();
+        for (int i = 0; i < adultCount; i++) {
+            family.add(createRandomEmoji(adultSize));
+        }
+
+        for (int i = 0; i < childCount; i++) {
+            family.add(createRandomEmoji(childSize));
+        }
+
+        return family;
+
+        // return List.of(
+        //     createRandomEmoji(adultSize),
+        //     createRandomEmoji(childSize));
     }
 
     private static GraphicsGroup createRandomEmoji(double size) {
@@ -83,7 +113,20 @@ public class EmojiVacation {
         // type A, else with some other probability return emoji type B, else with a certain
         // probability ... etc ... else return a smiley by default.
         //
-        return ProvidedEmojis.createSmileyFace(size);
+        int choice = randomInt(0, 4);
+
+        if (choice == 0) {
+            return ProvidedEmojis.createSmileyFace(size);
+        } else if (choice == 1) {
+            return ProvidedEmojis.createFrownyFace(size);
+        } else if (choice == 2) {
+            return ProvidedEmojis.createWinkingFace(size);
+        } else if (choice == 3) {
+            return ProvidedEmojis.createContentedFace(size);
+        } else {
+            return ProvidedEmojis.createNauseousFace(size);
+        }
+        // return ProvidedEmojis.createSmileyFace(size);
     }
 
     private static void positionFamily(
@@ -101,6 +144,12 @@ public class EmojiVacation {
         //
         // The bottom of each emoji should be baselineY. But setPosition() sets the _top_! How do you set the bottom to
         // a given position? (Hint: you can ask any graphics object for its height.)
+        double new_X = leftX;
+        for (GraphicsGroup emoji : family){
+            double emoji_Y = baselineY - emoji.getHeight();
+            emoji.setPosition(new_X, emoji_Y);
+            new_X += emoji.getWidth() + 25;
+        }
     }
 
     // –––––– Scenery ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
